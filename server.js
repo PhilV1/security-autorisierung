@@ -95,13 +95,39 @@ app.post('/login', async (req, res) => {
   }
 })
 
-app.post('/post', (req, res) => {
+app.post('/post', async (req, res) => {
   try {
-    const post = Post.create(req.body)
+    const post = await Post.create(req.body)
     res.status(201).json(post)
   } catch (error) {
     res.send(error.message)
   }
+})
+
+app.get('/posts', async (req, res) => {
+  try {
+    const posts = await Post.find()
+    res.status(200).json(posts)
+  } catch (error) {
+    res.send(error.message)
+  }
+})
+
+// delete post from posts list wenn der benutzer ein admin role hat.
+app.delete('/deletepost/:id', auth, async (req, res) => {
+  const user = await User.findById(req.user.user_id)
+  console.log(user, user.role)
+  if (!user) {
+    return res.status(400).json({ message: 'Benutzer existiert nicht' })
+  }
+
+  if (user.role !== 'admin') {
+    return res.status(400).json({ message: 'Benutzer ist kein Admin' })
+  }
+  // ein post löschen
+  const post = await Post.findByIdAndDelete(req.params.id)
+
+  res.status(201).json('post removed')
 })
 
 const startServer = async () => {
