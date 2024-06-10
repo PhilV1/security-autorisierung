@@ -14,6 +14,16 @@ const app = express()
 app.use(express.json())
 const port = process.env.API_PORT || 3001
 
+app.get('/users', async (req, res) => {
+  try {
+    const users = await User.find()
+    res.status(200).json(users)
+  } catch (err) {
+    console.log(err)
+    res.status(500).send('Internal Server Error')
+  }
+})
+
 app.post('/register', async (req, res) => {
   try {
     // Get user input
@@ -26,7 +36,7 @@ app.post('/register', async (req, res) => {
 
     // check if user already exist
     // Validate if user exist in our database
-    const oldUser = await User.findOne({ email })
+    const oldUser = await User.findOne({ email: email.toLowerCase() })
 
     if (oldUser) {
       return res.status(409).send('User Already Exist. Please Login ')
