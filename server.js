@@ -68,7 +68,7 @@ app.post('/login', async (req, res) => {
       res.status(400).send('All input is required')
     }
     // Validate if user exist in our database
-    const user = await User.findOne({ email })
+    const user = await User.findOne({ email: email.toLowerCase() })
 
     if (user && bcrypt.compare(password, user.password)) {
       // Generate token
@@ -82,6 +82,9 @@ app.post('/login', async (req, res) => {
       )
       user.token = token
 
+      user.role = role
+      await user.save()
+
       // user
       res.status(200).json(user)
     } else {
@@ -89,6 +92,15 @@ app.post('/login', async (req, res) => {
     }
   } catch (err) {
     console.log(err)
+  }
+})
+
+app.post('/post', (req, res) => {
+  try {
+    const post = Post.create(req.body)
+    res.status(201).json(post)
+  } catch (error) {
+    res.send(error.message)
   }
 })
 
