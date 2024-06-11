@@ -69,8 +69,8 @@ app.post('/login', async (req, res) => {
     }
     // Validate if user exist in our database
     const user = await User.findOne({ email: email.toLowerCase() })
-
-    if (user && bcrypt.compare(password, user.password)) {
+    console.log(password, user.password)
+    if (user && (await bcrypt.compare(password, user.password))) {
       // Generate token
       const token = jwt.sign(
         { user_id: user._id, email, role: role },
