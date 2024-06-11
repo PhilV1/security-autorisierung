@@ -113,6 +113,30 @@ app.get('/posts', async (req, res) => {
   }
 })
 
+app.delete('/deleteownpost/:id', auth, async (req, res) => {
+  const user = await User.findById(req.user.user_id)
+  if (!user) {
+    return res.status(400).json({ message: 'Benutzer existiert nicht' })
+  }
+
+  //  check if the user has editor role
+  if (user.role !== 'editor') {
+    return res.status(400).json({ message: 'Benutzer ist kein Editor' })
+  }
+
+  // check if the user is the owner of the post
+  const post = await Post.findById(req.params.id)
+  console.log(post.owner.toString(), req.user.user_id)
+  if (post.owner.toString() !== req.user.user_id) {
+    return res
+      .status(400)
+      .json({ message: 'Benutzer ist nicht der Besitzer des Posts' })
+  }
+  await Post.findByIdAndDelete(req.params.id)
+
+  res.status(201).json('post removed')
+})
+
 // delete post from posts list wenn der benutzer ein admin role hat.
 app.delete('/deletepost/:id', auth, async (req, res) => {
   const user = await User.findById(req.user.user_id)
