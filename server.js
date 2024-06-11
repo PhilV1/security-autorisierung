@@ -6,7 +6,7 @@ import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import User from './models/User.js'
 import Post from './models/Post.js'
-// import roleCheck from './middleware/roleCheck.js'
+import roleCheck from './middleware/roleCheck.js'
 import auth from './middleware/auth.js'
 
 const app = express()
@@ -152,6 +152,11 @@ app.delete('/deletepost/:id', auth, async (req, res) => {
   const post = await Post.findByIdAndDelete(req.params.id)
 
   res.status(201).json('post removed')
+})
+
+app.delete('/post/:id', auth, roleCheck('admin'), async (req, res) => {
+  const post = await Post.findByIdAndDelete(req.params.id)
+  res.json(post)
 })
 
 const startServer = async () => {
